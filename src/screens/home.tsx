@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ClipboardCheck, Camera, ChevronRight, LogOut, Sprout, CloudUpload, CheckCircle2, WifiOff, Check, ChevronDown, RefreshCw, Loader2, Pencil, ReceiptText } from "lucide-react";
+import { ClipboardCheck, Camera, ChevronRight, LogOut, Sprout, CloudUpload, CheckCircle2, WifiOff, Check, ChevronDown, RefreshCw, Loader2, Pencil, ReceiptText, CalendarCheck } from "lucide-react";
 import type { Pairing } from "@/lib/pairing";
 import type { Estate } from "@/lib/api";
 import {
@@ -27,10 +27,11 @@ interface HomeProps {
   onAttendance: () => void;
   onWorkUpdate: () => void;
   onExpense: () => void;
+  onPlan: () => void;
   onExit: () => void;
 }
 
-export function HomeScreen({ pairing, estates, activeEstateId, onSwitchEstate, onRenameEstate, pendingCount, isOnline, lastSyncTime, syncing, onSync, onAttendance, onWorkUpdate, onExpense, onExit }: HomeProps) {
+export function HomeScreen({ pairing, estates, activeEstateId, onSwitchEstate, onRenameEstate, pendingCount, isOnline, lastSyncTime, syncing, onSync, onAttendance, onWorkUpdate, onExpense, onPlan, onExit }: HomeProps) {
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<Estate | null>(null);
   const [renameValue, setRenameValue] = useState("");
@@ -211,6 +212,20 @@ export function HomeScreen({ pairing, estates, activeEstateId, onSwitchEstate, o
           <div className="flex-1 min-w-0">
             <p className="font-bold text-gray-900">Work Update</p>
             <p className="text-sm text-gray-500 leading-snug">Post a photo and what work was done</p>
+          </div>
+          <ChevronRight className="h-5 w-5 text-gray-300 flex-shrink-0" />
+        </button>
+
+        <button
+          onClick={onPlan}
+          className="w-full bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4 active:bg-gray-50 text-left"
+        >
+          <div className="h-14 w-14 rounded-2xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+            <CalendarCheck className="h-7 w-7 text-emerald-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-gray-900">Work Plan</p>
+            <p className="text-sm text-gray-500 leading-snug">See the owner's schedule for each month</p>
           </div>
           <ChevronRight className="h-5 w-5 text-gray-300 flex-shrink-0" />
         </button>

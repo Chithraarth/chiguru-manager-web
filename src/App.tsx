@@ -28,6 +28,7 @@ import { HomeScreen } from "@/screens/home";
 import { AttendanceScreen } from "@/screens/attendance";
 import { WorkUpdateScreen } from "@/screens/work-update";
 import { ExpenseScreen } from "@/screens/expenses";
+import { PlanScreen } from "@/screens/plan";
 import { getPairing, savePairing, clearPairing, type Pairing } from "@/lib/pairing";
 import { auth, onAuthStateChanged, signOutUser } from "@/lib/firebase";
 import { refreshCurrency } from "@/lib/currency";
@@ -38,7 +39,7 @@ const queryClient = new QueryClient({
   },
 });
 
-type Screen = "home" | "attendance" | "work-update" | "expense";
+type Screen = "home" | "attendance" | "work-update" | "expense" | "plan";
 
 function AppInner() {
   const { toast } = useToast();
@@ -313,6 +314,8 @@ function AppInner() {
           <WorkUpdateScreen pairing={pairing} onBack={() => setScreen("home")} onRevoked={handleRevoked} onRecorded={() => void runSync()} />
         ) : screen === "expense" ? (
           <ExpenseScreen pairing={pairing} activeEstateId={activeEstateId} onBack={() => setScreen("home")} onRevoked={handleRevoked} />
+        ) : screen === "plan" ? (
+          <PlanScreen activeEstateId={activeEstateId} onBack={() => setScreen("home")} />
         ) : (
           <HomeScreen
             pairing={pairing}
@@ -328,6 +331,7 @@ function AppInner() {
             onAttendance={() => setScreen("attendance")}
             onWorkUpdate={() => setScreen("work-update")}
             onExpense={() => setScreen("expense")}
+            onPlan={() => setScreen("plan")}
             onExit={() => setConfirmExit(true)}
           />
         )}
