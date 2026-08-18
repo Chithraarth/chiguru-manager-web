@@ -208,9 +208,10 @@ export function AttendanceScreen({
     enabled: !!group,
   });
 
-  const markedIds = new Set(todayAtt.map((a) => a.workerId));
+  const todayAttForGroup = group ? todayAtt.filter((a) => a.workGroupId === group.id) : [];
+  const markedIds = new Set(todayAttForGroup.map((a) => a.workerId));
   const markedAtByWorker = new Map(
-    todayAtt.filter((a) => a.createdAt).map((a) => [a.workerId, a.createdAt as string]),
+    todayAttForGroup.filter((a) => a.createdAt).map((a) => [a.workerId, a.createdAt as string]),
   );
   const activeWorkers = workers.filter((w) => w.isActive);
 
