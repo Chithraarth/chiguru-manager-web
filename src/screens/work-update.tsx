@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { apiPost, apiUrl, getActiveEstateId, checkManagerSession } from "@/lib/api";
+import { apiPost, apiUrl, estateHeaders, getActiveEstateId, checkManagerSession } from "@/lib/api";
 import { savePendingEstateUpdate, newLocalId } from "@/lib/offline-db";
 import { useToast } from "@/hooks/use-toast";
 import type { Pairing } from "@/lib/pairing";
@@ -102,7 +102,7 @@ export function WorkUpdateScreen({
     try {
       const res = await fetch(apiUrl("/ai/count-workers"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await estateHeaders(),
         body: JSON.stringify({ imageBase64: dataUrl }),
       });
       if (res.ok) {

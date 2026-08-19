@@ -47,15 +47,30 @@ export function setActiveEstateId(id: string | number) {
  * forgotten — without the token the server falls back to trusting the estate
  * header at face value, and without X-Estate-Id it defaults to the owner's first
  * estate and the manager's writes land on (or 404 against) the wrong one.
+ *
+ * X-Actor-Role tells the backend this is the Manager app — needed only for the
+ * rare phone number that is both an invited Manager here AND, separately, an
+ * Owner of their own farm; the backend uses it to pick the right farm instead
+ * of guessing (see effectiveOwnerId in the backend's firebaseAuth.ts).
  */
 async function withAuthHeaders(headers: HeadersInit): Promise<HeadersInit> {
   const eid = getActiveEstateId();
   const token = await getIdToken();
   return {
     ...headers,
+    "X-Actor-Role": "manager",
     ...(eid ? { "X-Estate-Id": eid } : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
+}
+
+/**
+ * Headers with the active estate id + auth token + actor role, for the few
+ * call sites that must use raw fetch (e.g. AI headcount photo uploads)
+ * instead of apiFetch/apiPost.
+ */
+export async function estateHeaders(extra?: HeadersInit): Promise<HeadersInit> {
+  return withAuthHeaders({ "Content-Type": "application/json", ...(extra ?? {}) });
 }
 
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
