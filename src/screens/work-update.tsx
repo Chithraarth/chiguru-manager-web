@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronLeft, Camera, Video, X, Loader2, Upload, Users,
   Wifi, WifiOff, MapPin,
@@ -7,12 +7,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { apiPost, apiUrl, estateHeaders, getActiveEstateId, checkManagerSession } from "@/lib/api";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { apiFetch, apiPost, apiUrl, estateHeaders, getActiveEstateId, checkManagerSession } from "@/lib/api";
 import { savePendingEstateUpdate, newLocalId } from "@/lib/offline-db";
 import { useToast } from "@/hooks/use-toast";
 import type { Pairing } from "@/lib/pairing";
 
 const TODAY = new Date().toISOString().split("T")[0];
+
+interface WorkGroup {
+  id: number;
+  name: string;
+}
 
 function compressImage(dataUrl: string, maxW = 800): Promise<string> {
   return new Promise((resolve) => {
@@ -51,8 +59,15 @@ export function WorkUpdateScreen({
   const photoRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
 
+  const activeEstateId = getActiveEstateId();
+  const { data: groups = [], isLoading: loadingGroups } = useQuery<WorkGroup[]>({
+    queryKey: ["work-groups", activeEstateId],
+    queryFn: () => apiFetch("/work-groups"),
+  });
+
   const [mediaDataUrl, setMediaDataUrl] = useState<string | undefined>();
   const [mediaType, setMediaType] = useState<"photo" | "video" | undefined>();
+  const [workGroupId, setWorkGroupId] = useState("");
   const [description, setDescription] = useState("");
   const [blockName, setBlockName] = useState("");
   const [attendanceCount, setAttendanceCount] = useState("");
@@ -146,6 +161,10 @@ export function WorkUpdateScreen({
   }
 
   async function submit() {
+    if (!workGroupId) {
+      toast({ title: "Please select a work group", variant: "destructive" });
+      return;
+    }
     if (!description.trim()) {
       toast({ title: "Please describe the work done", variant: "destructive" });
       return;
@@ -160,6 +179,7 @@ export function WorkUpdateScreen({
       estateId: getActiveEstateId(),
       date: TODAY,
       workerName: pairing.managerName,
+      workGroupId: Number(workGroupId),
       blockName: blockName.trim() || null,
       description: description.trim(),
       photoUrl: mediaType === "photo" ? (mediaDataUrl ?? null) : null,
@@ -312,6 +332,23 @@ export function WorkUpdateScreen({
             🤖 AI detected {attendanceCount || 0} worker{attendanceCount === "1" ? "" : "s"} — edit the count below if needed.
           </p>
         )}
+
+        {/* Work group */}
+        <div>
+          <label className="text-xs font-semibold text-gray-500 uppercase block mb-1.5">
+            Work group <span className="text-red-500">*</span>
+          </label>
+          <Select value={workGroupId} onValueChange={setWorkGroupId} disabled={loadingGroups}>
+            <SelectTrigger className="rounded-xl text-sm">
+              <SelectValue placeholder={loadingGroups ? "Loading…" : "Select a work group"} />
+            </SelectTrigger>
+            <SelectContent>
+              {groups.map((g) => (
+                <SelectItem key={g.id} value={String(g.id)}>{g.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Description */}
         <div>
